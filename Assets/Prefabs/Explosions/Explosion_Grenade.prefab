@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5978750042208898111
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5978750042208898109}
+  - component: {fileID: 5978750042208898110}
+  m_Layer: 0
+  m_Name: Explosion_Grenade
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5978750042208898109
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5978750042208898111}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -6.2868776, y: 0.25, z: 1.1893988}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5978750042208898110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5978750042208898111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe40beb058fce8b41a2c840f3933f8b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  explosionRadius: 3
+  explosionForce: 200
+  DefaultExplosion: {fileID: 5089353725639540089, guid: e1d6eaa93f52d874cb6cf8ab4a6a18bf,
+    type: 3}
+  Default: {fileID: 7185271847932722635, guid: aab4998ff0158fc4b8dfcdab9e05b229, type: 3}
+  Metal: {fileID: 7185271847932722635, guid: 39dbeef6d580da448880b24ba0c8e4d8, type: 3}
+  Soil: {fileID: 0}
+  Water: {fileID: 0}
+  Grass: {fileID: 0}
+  Wood: {fileID: 0}
+  Stone: {fileID: 0}
