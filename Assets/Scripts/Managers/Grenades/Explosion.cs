@@ -56,11 +56,11 @@ public class Explosion : MonoBehaviour
 		}
 	}
 
-	private GameObject GetExplosion(ExplosionTags explosionTag)
+	private GameObject GetExplosion(ExplosionTag explosionTag)
 	{
 		switch(explosionTag)
 		{
-			case ExplosionTags.Default:
+			case ExplosionTag.Default:
 			if(Default)
 			{
 				return Default;
@@ -70,7 +70,7 @@ public class Explosion : MonoBehaviour
 				return null;
 			}
 
-			case ExplosionTags.Metal:
+			case ExplosionTag.Metal:
 			if(Metal)
 			{
 				return Metal;
@@ -80,7 +80,7 @@ public class Explosion : MonoBehaviour
 				return null;
 			}
 
-			case ExplosionTags.Soil:
+			case ExplosionTag.Soil:
 			if(Soil)
 			{
 				return Soil;
@@ -90,7 +90,7 @@ public class Explosion : MonoBehaviour
 				return null;
 			}
 
-			case ExplosionTags.Water:
+			case ExplosionTag.Water:
 			if(Water)
 			{
 				return Water;
@@ -100,7 +100,7 @@ public class Explosion : MonoBehaviour
 				return null;
 			}
 
-			case ExplosionTags.Grass:
+			case ExplosionTag.Grass:
 			if(Grass)
 			{
 				return Grass;
@@ -110,7 +110,7 @@ public class Explosion : MonoBehaviour
 				return null;
 			}
 
-			case ExplosionTags.Wood:
+			case ExplosionTag.Wood:
 			if(Wood)
 			{
 				return Wood;
@@ -120,7 +120,7 @@ public class Explosion : MonoBehaviour
 				return null;
 			}
 
-			case ExplosionTags.Stone:
+			case ExplosionTag.Stone:
 			if(Stone)
 			{
 				return Stone;

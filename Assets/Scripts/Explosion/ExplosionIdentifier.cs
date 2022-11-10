@@ -1,13 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ExplosionIdentifier : MonoBehaviour
 {
-	public ExplosionTags explosionTag = ExplosionTags.Default;
+	public ExplosionTag explosionTag = ExplosionTag.Default;
 }
 
-public enum ExplosionTags
+public enum ExplosionTag
 {
 	Default,
 	Metal,

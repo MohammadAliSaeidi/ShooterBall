@@ -31,7 +31,7 @@ public class Bullet : MonoBehaviour
 		trail.transform.parent = null;
 
 		rb = GetComponent<Rigidbody>();
-		rb.AddForce(transform.forward * BulletForce);
+		rb.AddForce(transform.forward * BulletForce, ForceMode.Impulse);
 		StartCoroutine(Co_Age(Age));
 	}
 

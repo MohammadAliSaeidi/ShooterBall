@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using BallShooter.Shared;
-using Photon.Pun;
 
 namespace BallShooter
 {
@@ -24,8 +23,6 @@ namespace BallShooter
 
 		bool CanJump = true;
 
-		PhotonView view;
-
 		#endregion
 
 		#region Events
@@ -40,8 +37,6 @@ namespace BallShooter
 
 		private void Start()
 		{
-			view = GetComponent<PhotonView>();
-
 			if(playerRB)
 			{
 				playerRB.maxAngularVelocity = _maxAngularVelocity;
@@ -51,11 +46,6 @@ namespace BallShooter
 
 		private void LateUpdate()
 		{
-			if(!view.IsMine)
-			{
-				return;
-			}
-
 			if(Input.mouseScrollDelta.y < 0 &&
 					Physics.Raycast(origin: playerRB.transform.position, direction: -Vector3.up, maxDistance: groundCheck))
 			{
@@ -65,11 +55,6 @@ namespace BallShooter
 
 		private void FixedUpdate()
 		{
-			if(!view.IsMine)
-			{
-				return;
-			}
-
 			if(playerRB)
 			{ //&& Shared.playerHandler.allowMove) {
 				MovePlayer();

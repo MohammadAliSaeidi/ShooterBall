@@ -1,11 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    void Start()
-    {
-        Application.targetFrameRate = 60;
-    }
+	[SerializeField] private PlayerMovementConfig playerMovementConfig;
+
+	private void Start()
+	{
+		//Application.targetFrameRate = 60;
+	}
 }

@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
 public class PlayerGunManager : MonoBehaviour
 {
 	public GameObject Player;
-	Rigidbody playerRB;
+	private Rigidbody playerRB;
+
+	[SerializeField] private LayerMask _cameraPointOfLookingLayerMask;
+	private CameraLookPointHandler cameraLookPointHandler;
 
 	[Header("Gun Holder elements")]
 	public Transform GunHolderPivot;
@@ -15,22 +18,22 @@ public class PlayerGunManager : MonoBehaviour
 	[Header("Camera elements")]
 	public Camera cam;
 	public Animator CameraAnimator_01;
-	public Transform PointOfCameraView;
+	[SerializeField] private Transform cameraLookingPoint;
 
 	[Header("Gun Attributes")]
-	public float GunMinimumDetectionDistance = 2;
+	public float ItemDetectionDist = 2;
 	public Gun GunSlot1;
 	public Gun GunSlot2;
 	public Transform PointOfGunView;
-	Gun CurrentGun;
-	DropedGun CurrentDropedGun; // current gun that is on the ground and the player is looking at it
-	List<Gun> guns = new List<Gun>();
+	private Gun CurrentGun;
+	private DropedGun CurrentDropedGun; // current gun that is on the ground and the player is looking at it
+	private List<Gun> guns = new List<Gun>();
 
 	[Header("Grenades")]
 	public float GrenadeThrowPower = 10;
-	DropedGrenade CurrentDropedGrenade;
-	DropedGrenade CurrentGrenade;
-	List<DropedGrenade> grenades = new List<DropedGrenade>();
+	private DropedGrenade CurrentDropedGrenade;
+	private DropedGrenade CurrentGrenade;
+	private List<DropedGrenade> grenades = new List<DropedGrenade>();
 
 	[Header("Spread Attributes")]
 	public float MaxSpreadConeSize = 1.5f;
@@ -40,17 +43,22 @@ public class PlayerGunManager : MonoBehaviour
 	[Header("Recoil Attributes")]
 	public Transform RecoilTransform;
 	public float RecoilBackupSpeed = 2;
-	Vector3 RecoilOriginalPos;
+	private Vector3 RecoilOriginalPos;
 
 	private float LastFireTime = -1;
 
 	[Header("CrossHair")]
 	public CrossHairMaster crossHair;
 
+	private void Awake()
+	{
+		cameraLookPointHandler = GetComponent<CameraLookPointHandler>();
+	}
+
 	private void Start()
 	{
 		Player = GameObject.FindWithTag("Player");
-		if(Player)
+		if (Player)
 		{
 			playerRB = Player.GetComponent<Rigidbody>();
 		}
@@ -61,60 +69,60 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void Update()
 	{
-		if(cam)
+		if (cam)
 		{
 			RaycastHit hit = new RaycastHit();
 			Ray cameraRay = new Ray(cam.transform.position, cam.transform.forward);
 
-			if(Physics.Raycast(cameraRay, out hit, 500, ~(1 << LayerMask.NameToLayer("Player")))) // if the hit gameObject layer is not Player
-			{
-				PointOfCameraView.position = hit.point;
-			}
-			if(CurrentGun)
+			cameraLookingPoint.position = cameraLookPointHandler.PointOfCameraLooking;
+
+			if (CurrentGun)
 			{
 				Ray gunRay = new Ray(CurrentGun.BulletSpawnPoint.position, CurrentGun.BulletSpawnPoint.forward);
-				if(Physics.Raycast(gunRay, out hit, 500, ~(1 << LayerMask.NameToLayer("Player")))) // if the hit gameObject layer is not Player
+				if (Physics.Raycast(gunRay, out hit, 500, _cameraPointOfLookingLayerMask)) // if the hit gameObject layer is not Player
 				{
 					PointOfGunView.position = hit.point;
 				}
 			}
-			if(Physics.Raycast(cameraRay, out hit, GunMinimumDetectionDistance))
+
+			if (Physics.Raycast(cameraRay, out hit, ItemDetectionDist))
 			{
-				if(hit.collider.CompareTag("Gun"))
+				if (hit.collider.CompareTag("Gun"))
 				{
 					CurrentDropedGun = hit.collider.GetComponent<DropedGun>();
 				}
-				else if(!hit.collider.CompareTag("Gun") || hit.collider.gameObject == null)
+				else if (!hit.collider.CompareTag("Gun") || hit.collider.gameObject == null)
 				{
 					CurrentDropedGun = null;
 				}
 
-				if(hit.collider.CompareTag("Grenade"))
+				if (hit.collider.CompareTag("Grenade"))
 				{
 					CurrentDropedGrenade = hit.collider.GetComponent<DropedGrenade>();
 				}
-				else if(!hit.collider.CompareTag("Grenade") || hit.collider.gameObject == null)
+				else if (!hit.collider.CompareTag("Grenade") || hit.collider.gameObject == null)
 				{
 					CurrentDropedGrenade = null;
 				}
 			}
 		}
 
-		if(GunHolderPivot && Player)
+		if (GunHolderPivot && Player)
 		{
 			GunHolderPivot.transform.position = Player.transform.position;
 		}
 
-		if(CurrentDropedGun) // the current droped gun on the ground that we are looking at
+		if (CurrentDropedGun) // the current droped gun on the ground that we are looking at
 		{
-			if(Input.GetKeyDown(KeyCode.E))
+			if (Input.GetKeyDown(KeyCode.E))
 			{
 				PickupTheGun();
 			}
 		}
-		if(CurrentDropedGrenade && CurrentDropedGrenade.pickable)
+
+		if (CurrentDropedGrenade && CurrentDropedGrenade.pickable)
 		{
-			if(Input.GetKeyDown(KeyCode.E))
+			if (Input.GetKeyDown(KeyCode.E))
 			{
 				PickupTheGrenade();
 			}
@@ -124,46 +132,46 @@ public class PlayerGunManager : MonoBehaviour
 	private void LateUpdate()
 	{
 
-		if(Input.GetKey(KeyCode.Mouse0))
+		if (Input.GetKey(KeyCode.Mouse0))
 		{
-			if(CurrentGun)
+			if (CurrentGun)
 			{
 				HandleFire();
 			}
 		}
-		else if(CurrentGun)
+		else if (CurrentGun)
 		{
 			ResetSpread(CurrentGun);
 		}
 
-		if(Input.GetKeyUp(KeyCode.Mouse0))
+		if (Input.GetKeyUp(KeyCode.Mouse0))
 		{
-			if(CurrentGrenade)
+			if (CurrentGrenade)
 			{
 				ThrowGrenade();
 			}
 		}
 
-		if(Input.GetKeyDown(KeyCode.Alpha1))
+		if (Input.GetKeyDown(KeyCode.Alpha1))
 		{
 			SwitchWeapon(GunSlot1);
 		}
 
-		if(Input.GetKeyDown(KeyCode.Alpha2))
+		if (Input.GetKeyDown(KeyCode.Alpha2))
 		{
 			SwitchWeapon(GunSlot2);
 		}
 
-		if(Input.GetKeyDown(KeyCode.Alpha3))
+		if (Input.GetKeyDown(KeyCode.Alpha3))
 		{
-			if(grenades.Any())
+			if (grenades.Any())
 			{
-				if(!CurrentGrenade)
+				if (!CurrentGrenade)
 				{
 					SwitchToGrenade(grenades[0]);
 				}
 
-				else if(CurrentGrenade && grenades.Count > 1)
+				else if (CurrentGrenade && grenades.Count > 1)
 				{
 					SwitchToNextGrenade();
 				}
@@ -187,7 +195,7 @@ public class PlayerGunManager : MonoBehaviour
 		int nextIndex = grenades.IndexOf(CurrentGrenade);
 
 		// if current grenade is the last grenade in the grenade list go at the first of the list
-		if(nextIndex == grenades.Count - 1)
+		if (nextIndex == grenades.Count - 1)
 		{
 			nextIndex = 0;
 		}
@@ -202,7 +210,7 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void ResetRecoil()
 	{
-		if(RecoilTransform.position != RecoilOriginalPos)
+		if (RecoilTransform.position != RecoilOriginalPos)
 		{
 			float dist = Vector3.Distance(RecoilTransform.localPosition, RecoilOriginalPos);
 			RecoilTransform.localPosition = Vector3.Lerp(RecoilTransform.localPosition, RecoilOriginalPos, Time.deltaTime * RecoilBackupSpeed / dist);
@@ -211,13 +219,13 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void HandleFire()
 	{
-		if(Time.time > LastFireTime + 1 / CurrentGun.FireRate)
+		if (Time.time > LastFireTime + 1 / CurrentGun.FireRate)
 		{
 			ShootBullet();
 			CurrentGun.EmitMuzzleFlash();
 			HandleRecoil();
-			DropShell();
-			CameraAnimation();
+			CurrentGun.BulletShellParticle.Emit(1);
+			CameraAnimator_01.SetTrigger("Shoot");
 			IncreaseSpread(CurrentGun);
 			LastFireTime = Time.time;
 		}
@@ -228,7 +236,7 @@ public class PlayerGunManager : MonoBehaviour
 		GameObject grenade = Instantiate(CurrentGrenade.grenade, CurrentGrenade.transform.position, CurrentGrenade.transform.rotation).gameObject;
 		Rigidbody grenadeRB = grenade.GetComponent<Rigidbody>();
 		Vector3 playerVelocity = Vector3.zero;
-		if(playerRB)
+		if (playerRB)
 		{
 			playerVelocity = playerRB.velocity;
 		}
@@ -236,7 +244,7 @@ public class PlayerGunManager : MonoBehaviour
 		grenadeRB.velocity += playerVelocity;
 		grenades.Remove(CurrentGrenade);
 		Destroy(CurrentGrenade.gameObject);
-		if(grenades.Any())
+		if (grenades.Any())
 		{
 			SwitchToNextGrenade();
 		}
@@ -248,7 +256,7 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void IncreaseSpread(Gun gun)
 	{
-		if(gun.ConeSpreadSize < MaxSpreadConeSize)
+		if (gun.ConeSpreadSize < MaxSpreadConeSize)
 		{
 			gun.ConeSpreadSize += SpreadIncrementSpeed;
 		}
@@ -260,9 +268,9 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void ResetSpread(Gun gun)
 	{
-		if(CurrentGun)
+		if (CurrentGun)
 		{
-			if(gun.ConeSpreadSize != 0)
+			if (gun.ConeSpreadSize != 0)
 			{
 				gun.ConeSpreadSize = Mathf.Lerp(gun.ConeSpreadSize, 0,
 														Time.deltaTime * SpreadDecrementSpeed / gun.ConeSpreadSize);
@@ -272,7 +280,7 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void HandleCrossHair(float additiveValue)
 	{
-		foreach(var s in crossHair.sliders)
+		foreach (var s in crossHair.sliders)
 		{
 			s.value += additiveValue;
 		}
@@ -280,10 +288,10 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void InitCrosshair()
 	{
-		if(CurrentGun)
+		if (CurrentGun)
 		{
 			crossHair.gameObject.SetActive(true);
-			foreach(var s in crossHair.sliders)
+			foreach (var s in crossHair.sliders)
 			{
 				s.maxValue = CurrentGun.VerticalRecoil * 10;
 			}
@@ -296,7 +304,7 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void PickupTheGun()
 	{
-		if(GunHolder)
+		if (GunHolder)
 		{
 			GameObject gunInstance = Instantiate(CurrentDropedGun.gun.gameObject, CurrentDropedGun.transform.position, CurrentDropedGun.transform.rotation);
 			Gun gun = gunInstance.GetComponent<Gun>();
@@ -321,7 +329,7 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void PickupTheGrenade()
 	{
-		if(GunHolder)
+		if (GunHolder)
 		{
 			StartCoroutine(Co_PickupGrenade());
 		}
@@ -336,11 +344,11 @@ public class PlayerGunManager : MonoBehaviour
 		pickedGrenade.GetComponent<Rigidbody>().isKinematic = true;
 
 		bool grenadeIsOnRightPos = false;
-		while(!grenadeIsOnRightPos)
+		while (!grenadeIsOnRightPos)
 		{
 			float dist = Vector3.Distance(pickedGrenade.transform.position, GunHolder.transform.position);
 			float angle = Quaternion.Angle(pickedGrenade.transform.rotation, GunHolder.transform.rotation);
-			if(dist > 0.5f || angle > 1f)
+			if (dist > 0.5f || angle > 1f)
 			{
 				float speed = 10f;
 
@@ -363,7 +371,7 @@ public class PlayerGunManager : MonoBehaviour
 		pickedGrenade.GetComponent<Collider>().enabled = false;
 
 		grenades.Add(pickedGrenade);
-		if(CurrentGun)
+		if (CurrentGun)
 		{
 			pickedGrenade.gameObject.SetActive(false);
 		}
@@ -375,7 +383,7 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void HolsterCurrentGrenade()
 	{
-		if(CurrentGrenade)
+		if (CurrentGrenade)
 		{
 			CurrentGrenade.gameObject.SetActive(false);
 			CurrentGrenade = null;
@@ -384,7 +392,7 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void HolsterCurrentGun()
 	{
-		if(CurrentGun)
+		if (CurrentGun)
 		{
 			CurrentGun.gameObject.SetActive(false);
 			CurrentGun = null;
@@ -401,24 +409,24 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void PutGunAtSlot(Gun gun)
 	{
-		if(!GunSlot1 && !GunSlot2)
+		if (!GunSlot1 && !GunSlot2)
 		{
 			GunSlot1 = gun;
 		}
 
-		else if(GunSlot1 && !GunSlot2)
+		else if (GunSlot1 && !GunSlot2)
 		{
 			GunSlot2 = gun;
 		}
 
-		else if(GunSlot1 && GunSlot2)
+		else if (GunSlot1 && GunSlot2)
 		{
-			if(CurrentGun == GunSlot1 || CurrentGun == null)
+			if (CurrentGun == GunSlot1 || CurrentGun == null)
 			{
 				DropGun(GunSlot1);
 				GunSlot1 = gun;
 			}
-			else if(CurrentGun == GunSlot2)
+			else if (CurrentGun == GunSlot2)
 			{
 				DropGun(GunSlot2);
 				GunSlot2 = gun;
@@ -428,12 +436,12 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void SwitchWeapon(Gun gun)
 	{
-		if(CurrentGun == gun)
+		if (CurrentGun == gun)
 		{
 			return;
 		}
 
-		if(!guns.Contains(gun))
+		if (!guns.Contains(gun))
 		{
 			return;
 		}
@@ -454,11 +462,6 @@ public class PlayerGunManager : MonoBehaviour
 		gunSlot = null;
 	}
 
-	private void CameraAnimation()
-	{
-		CameraAnimator_01.SetTrigger("Shoot");
-	}
-
 	private void ShootBullet()
 	{
 		float xSpread = Random.Range(-1, 1);
@@ -466,11 +469,6 @@ public class PlayerGunManager : MonoBehaviour
 		Vector3 spread = new Vector3(xSpread, ySpread, 0.0f).normalized * CurrentGun.ConeSpreadSize;
 		Quaternion rotation = Quaternion.Euler(spread) * CurrentGun.BulletSpawnPoint.rotation;
 		Instantiate(CurrentGun.bullet, CurrentGun.BulletSpawnPoint.position, rotation);
-	}
-
-	private void DropShell()
-	{
-		CurrentGun.BulletShellParticle.Emit(1);
 	}
 
 	private void HandleRecoil()
