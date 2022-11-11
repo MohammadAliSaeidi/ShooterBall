@@ -74,7 +74,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 0.05
+  m_Time: 0.02
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.05
@@ -137,8 +137,8 @@ TrailRenderer:
     textureMode: 0
     shadowBias: 0.5
     generateLightingData: 0
-  m_MinVertexDistance: 0.5
-  m_Autodestruct: 1
+  m_MinVertexDistance: 0.2
+  m_Autodestruct: 0
   m_Emitting: 1
 --- !u!1 &4337402043843572534
 GameObject:
@@ -189,7 +189,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 2
+  m_CollisionDetection: 0
 --- !u!114 &-6229264761646185685
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,7 +202,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4120020d9cd84ec45a899295106830c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BulletForce: 100
+  BulletForce: 30
   Age: 1.5
   trail: {fileID: 6065544880063954329}
   Default: {fileID: 1193894311426232312, guid: a93be80ff1d310843a8e4c7e10e76398, type: 3}

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +5,7 @@ public class CrossHairMaster : MonoBehaviour
 {
 	[HideInInspector]
 	public Slider[] sliders;
+	private float currentVel;
 
 	private void Awake()
 	{
@@ -15,11 +14,11 @@ public class CrossHairMaster : MonoBehaviour
 
 	private void Update()
 	{
-		foreach(Slider s in sliders)
+		foreach (Slider s in sliders)
 		{
-			if(s.value > 0)
+			if (s.value > 0)
 			{
-				s.value = Mathf.Lerp(s.value, 0, Time.deltaTime * 5 / s.value);
+				s.value = Mathf.SmoothDamp(s.value, 0, ref currentVel, Time.deltaTime * 5);
 			}
 		}
 	}

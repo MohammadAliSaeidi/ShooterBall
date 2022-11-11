@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class SmoothMouseLook : MonoBehaviour {
+public class SmoothMouseLook : MonoBehaviour
+{
+	[SerializeField] private PlayerInputManager playerInputManager;
 
-	GameObject player;
+	private GameObject player;
 	private bool allowMouseLook = true;
 
 	public float mouseSpeed = 1.2f;
@@ -13,48 +13,68 @@ public class SmoothMouseLook : MonoBehaviour {
 
 	public float mouseSmoothing = 15f;
 	public float followSmooth = 5f;
+	private float Vertical;
+	private float Horizontal;
+	private float smoothH;
+	private float smoothV;
+	private Vector3 currentVel;
 
-	float Horizontal;
-	float Vertical;
-	float smoothH;
-	float smoothV;
-
-	private void Start () {
-		Horizontal = -transform.eulerAngles.x;
-		Vertical = transform.eulerAngles.y;
+	private void Start()
+	{
+		Vertical = -transform.eulerAngles.x;
+		Horizontal = transform.eulerAngles.y;
 
 		Cursor.lockState = CursorLockMode.Locked;
 	}
-	private void LateUpdate () {
-		
+
+	private void Update()
+	{
+		FollowPlayer();
+		MouseLookHandler();
 	}
-	private void Update () {
-		playerFollower();
-		mouseLookHandler();
-	}
-	private void playerFollower () {
-		if(player) {
-			transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * followSmooth);
+
+	private void FollowPlayer()
+	{
+		if (player)
+		{
+			//transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * followSmooth);
+			transform.position = Vector3.SmoothDamp(transform.position, player.transform.position, ref currentVel, Time.deltaTime * followSmooth);
+			//(transform.position, player.transform.position, Time.deltaTime * followSmooth);
 		}
-		else {
+		else
+		{
 			player = GameObject.FindWithTag("Player");
 		}
 	}
-	private void mouseLookHandler () {
-		Horizontal += Input.GetAxis("Mouse Y") * mouseSpeed;
-		Vertical += Input.GetAxis("Mouse X") * mouseSpeed;
 
-		Horizontal = Mathf.Clamp(Horizontal, -minTilt, maxTilt);
+	private void MouseLookHandler()
+	{
+		var mouseDelta = playerInputManager.playerControls.Ground.MouseLook.ReadValue<Vector2>();
+		if (playerInputManager)
+		{
+			Vertical += mouseDelta.y * mouseSpeed;
+			Horizontal += mouseDelta.x * mouseSpeed;
+		}
+
+		Vertical = Mathf.Clamp(Vertical, -minTilt, maxTilt);
 		mouseSmoothing = Mathf.Clamp(mouseSmoothing, 0f, 10f);
 
-		if(mouseSmoothing > 0) {
-			smoothH = Mathf.Lerp(smoothH, Horizontal, mouseSmoothing * Time.deltaTime);
-			smoothV = Mathf.Lerp(smoothV, Vertical, mouseSmoothing * Time.deltaTime);
+		if (mouseSmoothing > 0)
+		{
+			smoothH = Mathf.Lerp(smoothH, Vertical, mouseSmoothing * Time.deltaTime);
+			smoothV = Mathf.Lerp(smoothV, Horizontal, mouseSmoothing * Time.deltaTime);
 
 			transform.localRotation = Quaternion.Euler(-smoothH, smoothV, 0);
 		}
-		else {
-			transform.localRotation = Quaternion.Euler(-Horizontal, Vertical, 0);
+		else
+		{
+			transform.localRotation = Quaternion.Euler(-Vertical, Horizontal, 0);
 		}
+	}
+
+	public void HandleLook(float vertical, float horizontal)
+	{
+		Vertical += vertical;
+		Horizontal += horizontal;
 	}
 }

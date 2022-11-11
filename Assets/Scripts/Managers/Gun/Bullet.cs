@@ -35,24 +35,43 @@ public class Bullet : MonoBehaviour
 		StartCoroutine(Co_Age(Age));
 	}
 
-	private void FixedUpdate()
+	//private void FixedUpdate()
+	//{
+	//	// Previous Position
+	//	trail.transform.position = prevPos;
+
+	//	float dist = Vector3.Distance(transform.position, prevPos);
+
+	//	RaycastHit hit = new RaycastHit();
+	//	Ray bulletRay = new Ray(prevPos, transform.forward);
+
+	//	// Current Position
+	//	prevPos = transform.position;
+	//	prevDir = transform.forward;
+
+	//	if(Physics.Raycast(bulletRay, out hit, dist))
+	//	{
+	//		BulletImpactIdentifier bulletImpactIdentifier = hit.transform.gameObject.GetComponent<BulletImpactIdentifier>();
+	//		if(bulletImpactIdentifier)
+	//		{
+	//			Vector3 surfaceNormal = hit.normal;
+	//			Vector3 hitPoint = hit.point;
+	//			var bulletImpact = Instantiate(GetBulletImpact(bulletImpactIdentifier.bulletImpactTags), hitPoint, Quaternion.LookRotation(surfaceNormal));
+	//			trail.transform.position = hitPoint;
+	//			trail.autodestruct = true;
+	//		}
+	//		Destroy(gameObject);
+	//	}
+	//}
+
+	private void Update()
 	{
-		// Previous Position
 		trail.transform.position = prevPos;
 
-		float dist = Vector3.Distance(transform.position, prevPos);
-
-		RaycastHit hit = new RaycastHit();
-		Ray bulletRay = new Ray(prevPos, transform.forward);
-
-		// Current Position
-		prevPos = transform.position;
-		prevDir = transform.forward;
-
-		if(Physics.Raycast(bulletRay, out hit, dist))
+		if (Physics.Linecast(prevPos, transform.position, out RaycastHit hit))
 		{
 			BulletImpactIdentifier bulletImpactIdentifier = hit.transform.gameObject.GetComponent<BulletImpactIdentifier>();
-			if(bulletImpactIdentifier)
+			if (bulletImpactIdentifier)
 			{
 				Vector3 surfaceNormal = hit.normal;
 				Vector3 hitPoint = hit.point;
@@ -62,6 +81,8 @@ public class Bullet : MonoBehaviour
 			}
 			Destroy(gameObject);
 		}
+
+		prevPos = transform.position;
 	}
 
 	private GameObject GetBulletImpact(BulletImpactTags bulletImpactTags)
