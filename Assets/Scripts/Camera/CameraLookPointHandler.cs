@@ -1,27 +1,32 @@
 using UnityEngine;
 
-public class CameraLookPointHandler : MonoBehaviour
+namespace BallShooter.Player
 {
-	public Vector3 PointOfCameraLooking { get; private set; }
-	[SerializeField] private Camera _camera;
-	[SerializeField] private LayerMask _cameraPointOfLookingLayerMask;
-
-	private readonly float _maxRayDist = 500;
-
-	private void Update()
+	public class CameraLookPointHandler : MonoBehaviour
 	{
-		if (_camera)
-		{
-			RaycastHit hit = new RaycastHit();
-			Ray cameraRay = new Ray(_camera.transform.position, _camera.transform.forward);
+		public Vector3 PointOfCameraLooking { get; private set; }
+		[SerializeField] private Transform _pointOfCameraLookingTr;
+		[SerializeField] private Camera _camera;
+		[SerializeField] private LayerMask _cameraPointOfLookingLayerMask;
 
-			if (Physics.Raycast(cameraRay, out hit, _maxRayDist, _cameraPointOfLookingLayerMask))
+		private readonly float _maxRayDist = 500;
+
+		private void Update()
+		{
+			if (_camera)
 			{
-				PointOfCameraLooking = hit.point;
-			}
-			else
-			{
-				PointOfCameraLooking = _camera.transform.forward * _maxRayDist;
+				RaycastHit hit = new RaycastHit();
+				Ray cameraRay = new Ray(_camera.transform.position, _camera.transform.forward);
+
+				if (Physics.Raycast(cameraRay, out hit, _maxRayDist, _cameraPointOfLookingLayerMask))
+				{
+					PointOfCameraLooking = hit.point;
+				}
+				else
+				{
+					PointOfCameraLooking = _camera.transform.forward * _maxRayDist;
+				}
+				_pointOfCameraLookingTr.position = PointOfCameraLooking;
 			}
 		}
 	}

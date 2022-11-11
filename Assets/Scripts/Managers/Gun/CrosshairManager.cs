@@ -12,7 +12,7 @@ public class CrosshairManager : MonoBehaviour
 			crossHair.gameObject.SetActive(true);
 			foreach (var s in crossHair.sliders)
 			{
-				s.maxValue = gun.VerticalRecoil * 10;
+				s.maxValue = gun.specifics.recoilInfo.VerticalRecoil * 10;
 			}
 		}
 		else

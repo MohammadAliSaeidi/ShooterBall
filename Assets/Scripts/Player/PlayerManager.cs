@@ -1,28 +1,50 @@
 using UnityEngine;
 
-[RequireComponent(typeof(PlayerEquipmentManager), typeof(RecoilHandler), typeof(PlayerInputManager))]
-[RequireComponent(typeof(CrosshairManager), typeof(PlayerGunManager))]
-public class PlayerManager : MonoBehaviour
+namespace BallShooter.Player
 {
-	#region Components
-
-	public PlayerEquipmentManager equipmentManager { get; private set; }
-	public CrosshairManager crosshairManager { get; private set; }
-	public RecoilHandler recoilHandler { get; private set; }
-	public PlayerInputManager inputManager { get; private set; }
-	public PlayerGunManager GunManager { get; private set; }
-
-	#endregion
-
-	private void Awake()
+	[RequireComponent(typeof(PlayerEquipmentManager_new), typeof(RecoilHandler), typeof(PlayerInputManager))]
+	[RequireComponent(typeof(CrosshairManager), typeof(PlayerGunManager), typeof(CameraLookPointHandler))]
+	public class PlayerManager : MonoBehaviour
 	{
-		equipmentManager = GetComponent<PlayerEquipmentManager>();
-		crosshairManager = GetComponent<CrosshairManager>();
-		inputManager = GetComponent<PlayerInputManager>();
-		recoilHandler = GetComponent<RecoilHandler>();
-		GunManager = GetComponent<PlayerGunManager>();
+		[SerializeField]
+		private PlayerConfig _playerConfig;
+		public PlayerConfig playerConfig { get { return _playerConfig; } }
 
-		equipmentManager.Initiate(this);
-		GunManager.Initiate(this);
+		#region Components
+
+		public PlayerEquipmentManager_new EquipmentManager { get; private set; }
+
+		public CrosshairManager CrosshairManager { get; private set; }
+
+		public RecoilHandler RecoilHandler { get; private set; }
+
+		public PlayerInputManager InputManager { get; private set; }
+
+		public PlayerGunManager GunManager { get; private set; }
+
+		public CameraLookPointHandler CameraLookPointHandler { get; private set; }
+
+		#endregion
+
+		private void Awake()
+		{
+			EquipmentManager = GetComponent<PlayerEquipmentManager_new>();
+			CrosshairManager = GetComponent<CrosshairManager>();
+			InputManager = GetComponent<PlayerInputManager>();
+			RecoilHandler = GetComponent<RecoilHandler>();
+			GunManager = GetComponent<PlayerGunManager>();
+			CameraLookPointHandler = GetComponent<CameraLookPointHandler>();
+		}
+
+		private void Start()
+		{
+			Initiate();
+		}
+
+		private void Initiate()
+		{
+			EquipmentManager.Initiate(this);
+			GunManager.Initiate(this);
+		}
 	}
 }

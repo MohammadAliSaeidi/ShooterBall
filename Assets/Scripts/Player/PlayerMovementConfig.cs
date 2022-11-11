@@ -1,6 +1,5 @@
-using UnityEngine;
-
-public class PlayerMovementConfig : ScriptableObject
+[System.Serializable]
+public class PlayerMovementConfig
 {
 	public float MaxSpeed;
 	public float JumpPower;

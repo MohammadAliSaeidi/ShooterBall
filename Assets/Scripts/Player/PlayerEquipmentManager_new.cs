@@ -1,468 +1,207 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-public class PlayerEquipmentManager_new : MonoBehaviour
+namespace BallShooter.Player
 {
-	#region Components
-
-	private PlayerManager playerManager;
-
-	#endregion
-
-
-	[Header("Equipment")]
-	[SerializeField]
-	private LayerMask EquipmentLayerMask;
-
-	public IEquipment SelectedEquipment { get; private set; }
-
-	private List<IEquipment> _equipments = new List<IEquipment>();
-	private IEquipment _equipmentOnGround;
-
-
-
-
-
-
-	public GameObject Player;
-	private Rigidbody playerRB;
-
-	[SerializeField] private LayerMask _cameraPointOfLookingLayerMask;
-	private CameraLookPointHandler cameraLookPointHandler;
-
-	[Header("Gun Holder elements")]
-	public Transform GunHolderPivot;
-	public Transform GunHolder;
-
-	[Header("Camera elements")]
-	[SerializeField]
-	private Camera _camera;
-	[SerializeField] private Transform cameraLookingPoint;
-
-	[Header("Gun Attributes")]
-	public float EquipmentDetectionDist = 2;
-	public Gun GunSlot1;
-	public Gun GunSlot2;
-	public Transform PointOfGunView;
-	public Gun CurrentGun { get; private set; }
-	private DropedGun CurrentDropedGun; // current gun that is on the ground and the player is looking at it
-	private List<Gun> guns = new List<Gun>();
-
-	[Header("Grenades")]
-	public float GrenadeThrowPower = 10;
-	private DropedGrenade CurrentDropedGrenade;
-	private DropedGrenade CurrentGrenade;
-	private List<DropedGrenade> grenades = new List<DropedGrenade>();
-
-	[Header("Spread Attributes")]
-	public float MaxSpreadConeSize = 1.5f;
-	public float SpreadIncrementSpeed = 0.15f;
-	public float SpreadDecrementSpeed = 1;
-
-	private void Awake()
+	public class PlayerEquipmentManager_new : MonoBehaviour
 	{
-		cameraLookPointHandler = GetComponent<CameraLookPointHandler>();
-	}
+		#region Components
 
-	private void Start()
-	{
-		Player = GameObject.FindWithTag("Player");
-		if (Player)
+		private PlayerManager playerManager;
+
+		#endregion
+
+		#region Events
+
+		public UnityEvent_Equipment e_OnEquipmentSwitched = new UnityEvent_Equipment();
+
+		#endregion
+
+		[SerializeField]
+		private LayerMask EquipmentLayerMask;
+
+		[SerializeField]
+		private Camera _camera;
+
+		[SerializeField]
+		private Transform cameraLookingPoint;
+
+		[SerializeField]
+		private float EquipmentDetectionDist = 2;
+
+		[SerializeField]
+		private Transform PointOfGunView;
+
+		[SerializeField]
+		private LayerMask _cameraPointOfLookingLayerMask;
+
+		[SerializeField]
+		private Transform GunHolderPivot;
+
+		[SerializeField]
+		private Transform GunHolder;
+
+		public IEquipment SelectedEquipment { get; private set; }
+
+		private GameObject _player;
+		private Rigidbody _playerRB;
+		private IEquipment _equipmentOnGround;
+		private List<Gun_New> _guns = new List<Gun_New>();
+		private List<Throwable> _throwables = new List<Throwable>();
+		private Coroutine _moveEquipmentToPlayer = null;
+		private Vector3 equipmentCurVel;
+
+		public void Initiate(PlayerManager playerManager)
 		{
-			playerRB = Player.GetComponent<Rigidbody>();
-		}
-	}
+			this.playerManager = playerManager;
 
-	private void Update()
-	{
-		if (_camera)
-		{
-			RaycastHit hit;
-			var cameraRay = new Ray(_camera.transform.position, _camera.transform.forward);
-
-			cameraLookingPoint.position = cameraLookPointHandler.PointOfCameraLooking;
-
-			if (CurrentGun)
-			{
-				var gunRay = new Ray(CurrentGun.BulletSpawnPoint.position, CurrentGun.BulletSpawnPoint.forward);
-				if (Physics.Raycast(gunRay, out hit, 500, _cameraPointOfLookingLayerMask)) // if the hit gameObject layer is not Player
+			playerManager.InputManager.playerControls.Ground.Intract.performed +=
+				delegate
 				{
-					PointOfGunView.position = hit.point;
-				}
-			}
+					if (_equipmentOnGround != null)
+					{
+						TryPickupEquipment(_equipmentOnGround);
+					}
+				};
+		}
 
-			if (Physics.Raycast(cameraRay, out hit, EquipmentDetectionDist, layerMask: EquipmentLayerMask))
+		private void Start()
+		{
+			_player = GameObject.FindWithTag("Player");
+			if (_player)
 			{
-				if (TryGetComponent(out IEquipment equipment) && _equipmentOnGround != equipment)
+				_playerRB = _player.GetComponent<Rigidbody>();
+			}
+		}
+
+		private void Update()
+		{
+			if (_camera)
+			{
+				var hit = new RaycastHit();
+				var cameraRay = new Ray(_camera.transform.position, _camera.transform.forward);
+
+				if (Physics.Raycast(cameraRay, out hit, EquipmentDetectionDist, layerMask: EquipmentLayerMask))
 				{
-					_equipmentOnGround = equipment;
-					Debug.Log(_equipmentOnGround);
+					if (hit.collider.TryGetComponent(out IEquipment equipment) && _equipmentOnGround != equipment)
+					{
+						_equipmentOnGround = equipment;
+						Debug.Log(_equipmentOnGround);
+					}
 				}
-
-
-				//if (hit.collider.CompareTag("Gun"))
-				//{
-				//	CurrentDropedGun = hit.collider.GetComponent<DropedGun>();
-				//}
-				//else if (!hit.collider.CompareTag("Gun") || hit.collider.gameObject == null)
-				//{
-				//	CurrentDropedGun = null;
-				//}
-
-				//if (hit.collider.CompareTag("Grenade"))
-				//{
-				//	CurrentDropedGrenade = hit.collider.GetComponent<DropedGrenade>();
-				//}
-				//else if (!hit.collider.CompareTag("Grenade") || hit.collider.gameObject == null)
-				//{
-				//	CurrentDropedGrenade = null;
-				//}
-			}
-			else
-			{
-				_equipmentOnGround = null;
-			}
-		}
-
-		if (GunHolderPivot && Player)
-		{
-			GunHolderPivot.transform.position = Player.transform.position;
-		}
-
-		if (CurrentDropedGun) // the current droped gun on the ground that we are looking at
-		{
-			if (Input.GetKeyDown(KeyCode.E))
-			{
-				PickupTheGun();
-			}
-		}
-
-		if (CurrentDropedGrenade && !CurrentDropedGrenade.hasBeenPicked)
-		{
-			if (Input.GetKeyDown(KeyCode.E))
-			{
-				PickupTheGrenade();
-			}
-		}
-	}
-
-	private void LateUpdate()
-	{
-
-		if (Input.GetKey(KeyCode.Mouse0))
-		{
-			if (CurrentGun)
-			{
-				HandleFire();
-			}
-		}
-		else if (CurrentGun)
-		{
-			ResetSpread(CurrentGun);
-		}
-
-		if (Input.GetKeyUp(KeyCode.Mouse0))
-		{
-			if (CurrentGrenade)
-			{
-				ThrowGrenade();
-			}
-		}
-
-		if (Input.GetKeyDown(KeyCode.Alpha1))
-		{
-			SwitchWeapon(GunSlot1);
-		}
-
-		if (Input.GetKeyDown(KeyCode.Alpha2))
-		{
-			SwitchWeapon(GunSlot2);
-		}
-
-		if (Input.GetKeyDown(KeyCode.Alpha3))
-		{
-			SwitchToGrenade();
-		}
-
-
-	}
-
-	public void Initiate(PlayerManager playerManager)
-	{
-		this.playerManager = playerManager;
-	}
-
-	private void SwitchToGrenade()
-	{
-		if (grenades.Any())
-		{
-			DropedGrenade grenade = null;
-
-			if (CurrentGrenade == null)
-			{
-
-				grenade = grenades[0];
-			}
-
-			else if (grenades.Count > 1)
-			{
-				// Switch to next grenade
-				int nextIndex = grenades.IndexOf(CurrentGrenade);
-				if (nextIndex != grenades.Count - 1)
-					nextIndex++;
 				else
-					nextIndex = 0;
-
-				grenade = grenades[nextIndex];
-			}
-
-			SwitchToGrenade(grenade);
-		}
-	}
-
-	private void SwitchToGrenade(DropedGrenade grenade)
-	{
-		if (grenade != null)
-		{
-			HolsterCurrentGun();
-			HolsterCurrentGrenade();
-
-			CurrentGrenade = grenade;
-			CurrentGrenade.gameObject.SetActive(true);
-		}
-	}
-
-	private void HandleFire()
-	{
-		//if (Time.time > LastFireTime + 1 / CurrentGun.FireRate)
-		//{
-		//	ShootBullet();
-		//	CurrentGun.EmitMuzzleFlash();
-		//	playerManager.recoilHandler.GenerateRecoil(CurrentGun.HorizontalRecoil, CurrentGun.VerticalRecoil);
-		//	playerManager.crosshairManager.HandleCrossHair(CurrentGun.VerticalRecoil);
-		//	CurrentGun.BulletShellParticle.Emit(1);
-		//	IncreaseSpread(CurrentGun);
-		//	LastFireTime = Time.time;
-		//}
-	}
-
-	private void ThrowGrenade()
-	{
-		GameObject grenade = Instantiate(CurrentGrenade.grenade, CurrentGrenade.transform.position, CurrentGrenade.transform.rotation).gameObject;
-		Rigidbody grenadeRB = grenade.GetComponent<Rigidbody>();
-		Vector3 playerVelocity = Vector3.zero;
-		if (playerRB)
-		{
-			playerVelocity = playerRB.velocity;
-		}
-		grenadeRB.AddForce(GunHolder.forward * GrenadeThrowPower);
-		grenadeRB.velocity += playerVelocity;
-		grenades.Remove(CurrentGrenade);
-		Destroy(CurrentGrenade.gameObject);
-		if (grenades.Any())
-		{
-			SwitchToGrenade();
-		}
-		else
-		{
-			SwitchWeapon(GunSlot1);
-		}
-	}
-
-	private void IncreaseSpread(Gun gun)
-	{
-		if (gun.ConeSpreadSize < MaxSpreadConeSize)
-		{
-			gun.ConeSpreadSize += SpreadIncrementSpeed;
-		}
-		else
-		{
-			gun.ConeSpreadSize = MaxSpreadConeSize;
-		}
-	}
-
-	private void ResetSpread(Gun gun)
-	{
-		if (CurrentGun)
-		{
-			if (gun.ConeSpreadSize != 0)
-			{
-				gun.ConeSpreadSize = Mathf.Lerp(gun.ConeSpreadSize, 0,
-														Time.deltaTime * SpreadDecrementSpeed / gun.ConeSpreadSize);
-			}
-		}
-	}
-
-	private void PickupTheGun()
-	{
-		if (GunHolder)
-		{
-			GameObject gunInstance = Instantiate(CurrentDropedGun.gun.gameObject, CurrentDropedGun.transform.position, CurrentDropedGun.transform.rotation);
-			Gun gun = gunInstance.GetComponent<Gun>();
-
-			guns.Add(gun);
-
-			PutGunAtSlot(gun);
-
-			HolsterCurrentGrenade();
-
-			HolsterCurrentGun();
-
-			InitPickedGun(gun);
-
-			SwitchWeapon(gun);
-
-			playerManager.crosshairManager.InitCrosshair(gun);
-
-			Destroy(CurrentDropedGun.gameObject);
-		}
-	}
-
-	private void PickupTheGrenade()
-	{
-		if (GunHolder)
-		{
-			StartCoroutine(Co_PickupGrenade());
-		}
-	}
-
-	private IEnumerator Co_PickupGrenade()
-	{
-		HolsterCurrentGrenade();
-
-		DropedGrenade pickedGrenade = CurrentDropedGrenade;
-		pickedGrenade.hasBeenPicked = true;
-		pickedGrenade.GetComponent<Rigidbody>().isKinematic = true;
-
-		bool grenadeIsOnRightPos = false;
-		while (!grenadeIsOnRightPos)
-		{
-			float dist = Vector3.Distance(pickedGrenade.transform.position, GunHolder.transform.position);
-			float angle = Quaternion.Angle(pickedGrenade.transform.rotation, GunHolder.transform.rotation);
-			if (dist > 0.5f || angle > 1f)
-			{
-				float speed = 10f;
-
-				pickedGrenade.transform.SetPositionAndRotation(
-					position: Vector3.MoveTowards(pickedGrenade.transform.position, GunHolder.transform.position, Time.deltaTime * speed),
-					rotation: Quaternion.RotateTowards(pickedGrenade.transform.rotation, GunHolder.transform.rotation, Time.deltaTime * speed * 100));
+				{
+					_equipmentOnGround = null;
+				}
 			}
 			else
 			{
-				pickedGrenade.transform.position = GunHolder.position;
-				pickedGrenade.transform.rotation = GunHolder.rotation;
-
-				transform.parent = GunHolder.transform;
-
-				grenadeIsOnRightPos = true;
+				Debug.LogError($"Camera field is empty on {this.name}");
 			}
+
+
+			if (GunHolderPivot && _player)
+			{
+				GunHolderPivot.transform.position = _player.transform.position;
+			}
+
+
+		}
+
+		private void TryPickupEquipment(IEquipment equipment)
+		{
+			equipment.Equip();
+
+			if (equipment is Gun_New)
+			{
+				var gun = (Gun_New)equipment;
+				PutGunToSlots(gun);
+				gun.Initiate(GunHolder.transform);
+			}
+
+			SwitchEquipment(equipment);
+
+			if (_moveEquipmentToPlayer != null)
+				StopCoroutine(_moveEquipmentToPlayer);
+			_moveEquipmentToPlayer = StartCoroutine(Co_MoveEquipmentToPlayer(equipment));
+		}
+
+		private void PutGunToSlots(Gun_New gun)
+		{
+			if (_guns.Count < playerManager.playerConfig.MaxGunSlots)
+			{
+				_guns.Add(gun);
+			}
+
+			else if (SelectedEquipment is Gun_New selectedGun)
+			{
+				DropedGun(selectedGun);
+			}
+
+			else
+			{
+				DropedGun(_guns[0]);
+			}
+		}
+
+		private void DropedGun(Gun_New gun)
+		{
+			if (_guns.Contains(gun))
+			{
+				_guns.Remove(gun);
+			}
+		}
+
+		private void HolsterSelectedEquipment()
+		{
+			if (SelectedEquipment != null)
+			{
+				(SelectedEquipment as MonoBehaviour).gameObject.SetActive(false);
+				SelectedEquipment = null;
+			}
+		}
+
+		private void SwitchEquipment(IEquipment equipment)
+		{
+			HolsterSelectedEquipment();
+			SelectedEquipment = equipment;
+			(equipment as MonoBehaviour).gameObject.SetActive(true);
+
+			e_OnEquipmentSwitched?.Invoke(equipment);
+		}
+
+		private IEnumerator Co_MoveEquipmentToPlayer(IEquipment equipment)
+		{
+			bool gunIsOnRightPos = false;
+			Transform equipmentTr = null;
+			equipmentTr = (equipment as MonoBehaviour).transform;
+
+			while (!gunIsOnRightPos)
+			{
+				float dist = Vector3.Distance(equipmentTr.position, GunHolder.position);
+				float angle = Quaternion.Angle(equipmentTr.rotation, GunHolder.rotation);
+
+				Debug.Log(dist);
+				Debug.Log(angle);
+
+
+				if (dist <= 0.1f && angle <= 0.1f)
+				{
+					equipmentTr.SetPositionAndRotation(GunHolder.position, GunHolder.rotation);
+					equipmentTr.SetParent(GunHolder);
+					gunIsOnRightPos = true;
+				}
+				else
+				{
+					equipmentTr.SetPositionAndRotation(
+						Vector3.SmoothDamp(equipmentTr.position, GunHolder.position, ref equipmentCurVel, Time.deltaTime * 10),
+						Quaternion.Lerp(equipmentTr.rotation, GunHolder.rotation, Time.deltaTime * 10));
+				}
+				yield return new WaitForEndOfFrame();
+			}
+
 			yield return null;
 		}
-		pickedGrenade.transform.parent = GunHolder;
-
-		pickedGrenade.GetComponent<Collider>().enabled = false;
-
-		grenades.Add(pickedGrenade);
-		if (CurrentGun)
-		{
-			pickedGrenade.gameObject.SetActive(false);
-		}
-		else
-		{
-			SwitchToGrenade(grenades.Where(x => x == pickedGrenade).FirstOrDefault());
-		}
-	}
-
-	private void HolsterCurrentGrenade()
-	{
-		if (CurrentGrenade)
-		{
-			CurrentGrenade.gameObject.SetActive(false);
-			CurrentGrenade = null;
-		}
-	}
-
-	private void HolsterCurrentGun()
-	{
-		if (CurrentGun)
-		{
-			CurrentGun.gameObject.SetActive(false);
-			CurrentGun = null;
-		}
-	}
-
-	private void InitPickedGun(Gun gun)
-	{
-		gun.PlayerGunHolder = GunHolder.transform;
-
-		gun.Ammo = CurrentDropedGun.Ammo;
-		gun.MagazineAmmo = CurrentDropedGun.MagazineAmmo;
-	}
-
-	private void PutGunAtSlot(Gun gun)
-	{
-		if (!GunSlot1 && !GunSlot2)
-		{
-			GunSlot1 = gun;
-		}
-
-		else if (GunSlot1 && !GunSlot2)
-		{
-			GunSlot2 = gun;
-		}
-
-		else if (GunSlot1 && GunSlot2)
-		{
-			if (CurrentGun == GunSlot1 || CurrentGun == null)
-			{
-				DropGun(GunSlot1);
-				GunSlot1 = gun;
-			}
-			else if (CurrentGun == GunSlot2)
-			{
-				DropGun(GunSlot2);
-				GunSlot2 = gun;
-			}
-		}
-	}
-
-	private void SwitchWeapon(Gun gun)
-	{
-		if (CurrentGun == gun)
-		{
-			return;
-		}
-
-		if (!guns.Contains(gun))
-		{
-			return;
-		}
-
-		HolsterCurrentGun();
-		HolsterCurrentGrenade();
-
-		gun.gameObject.SetActive(true);
-		CurrentGun = gun;
-	}
-
-	private void DropGun(Gun gunSlot)
-	{
-		var dropedGun = Instantiate(gunSlot.dropedGun, gunSlot.transform.position, gunSlot.transform.rotation);
-		dropedGun.Ammo = gunSlot.Ammo;
-		dropedGun.MagazineAmmo = gunSlot.MagazineAmmo;
-		Destroy(gunSlot.gameObject);
-		gunSlot = null;
-	}
-
-	private void ShootBullet()
-	{
-		float xSpread = Random.Range(-1, 1);
-		float ySpread = Random.Range(-1, 1);
-		Vector3 spread = new Vector3(xSpread, ySpread, 0.0f).normalized * CurrentGun.ConeSpreadSize;
-		Quaternion rotation = Quaternion.Euler(spread) * CurrentGun.BulletSpawnPoint.rotation;
-		Instantiate(CurrentGun.bullet, CurrentGun.BulletSpawnPoint.position, rotation);
 	}
 }
-

@@ -1,3 +1,4 @@
+using BallShooter.Player;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,7 +6,7 @@ using UnityEngine;
 
 public interface IEquipment
 {
-
+	public void Equip();
 }
 
 public class PlayerEquipmentManager : MonoBehaviour
@@ -259,13 +260,13 @@ public class PlayerEquipmentManager : MonoBehaviour
 
 	private void IncreaseSpread(Gun gun)
 	{
-		if (gun.ConeSpreadSize < MaxSpreadConeSize)
+		if (gun.specifics.recoilInfo.MaxConeSpreadSize < MaxSpreadConeSize)
 		{
-			gun.ConeSpreadSize += SpreadIncrementSpeed;
+			gun.specifics.recoilInfo.MaxConeSpreadSize += SpreadIncrementSpeed;
 		}
 		else
 		{
-			gun.ConeSpreadSize = MaxSpreadConeSize;
+			gun.specifics.recoilInfo.MaxConeSpreadSize = MaxSpreadConeSize;
 		}
 	}
 
@@ -273,10 +274,10 @@ public class PlayerEquipmentManager : MonoBehaviour
 	{
 		if (CurrentGun)
 		{
-			if (gun.ConeSpreadSize != 0)
+			if (gun.specifics.recoilInfo.MaxConeSpreadSize != 0)
 			{
-				gun.ConeSpreadSize = Mathf.Lerp(gun.ConeSpreadSize, 0,
-														Time.deltaTime * SpreadDecrementSpeed / gun.ConeSpreadSize);
+				gun.specifics.recoilInfo.MaxConeSpreadSize = Mathf.Lerp(gun.specifics.recoilInfo.MaxConeSpreadSize, 0,
+														Time.deltaTime * SpreadDecrementSpeed / gun.specifics.recoilInfo.MaxConeSpreadSize);
 			}
 		}
 	}
@@ -300,7 +301,7 @@ public class PlayerEquipmentManager : MonoBehaviour
 
 			SwitchWeapon(gun);
 
-			playerManager.crosshairManager.InitCrosshair(gun);
+			playerManager.CrosshairManager.InitCrosshair(gun);
 
 			Destroy(CurrentDropedGun.gameObject);
 		}
@@ -383,8 +384,8 @@ public class PlayerEquipmentManager : MonoBehaviour
 	{
 		gun.PlayerGunHolder = GunHolder.transform;
 
-		gun.Ammo = CurrentDropedGun.Ammo;
-		gun.MagazineAmmo = CurrentDropedGun.MagazineAmmo;
+		gun.CurrentMagazineAmmoCount = CurrentDropedGun.Ammo;
+		gun.ExtraAmmoCount = CurrentDropedGun.MagazineAmmo;
 	}
 
 	private void PutGunAtSlot(Gun gun)
@@ -436,8 +437,8 @@ public class PlayerEquipmentManager : MonoBehaviour
 	private void DropGun(Gun gunSlot)
 	{
 		var dropedGun = Instantiate(gunSlot.dropedGun, gunSlot.transform.position, gunSlot.transform.rotation);
-		dropedGun.Ammo = gunSlot.Ammo;
-		dropedGun.MagazineAmmo = gunSlot.MagazineAmmo;
+		//dropedGun.Ammo = gunSlot.Ammo;
+		//dropedGun.MagazineAmmo = gunSlot.MagazineAmmo;
 		Destroy(gunSlot.gameObject);
 		gunSlot = null;
 	}
@@ -446,9 +447,9 @@ public class PlayerEquipmentManager : MonoBehaviour
 	{
 		float xSpread = Random.Range(-1, 1);
 		float ySpread = Random.Range(-1, 1);
-		Vector3 spread = new Vector3(xSpread, ySpread, 0.0f).normalized * CurrentGun.ConeSpreadSize;
-		Quaternion rotation = Quaternion.Euler(spread) * CurrentGun.BulletSpawnPoint.rotation;
-		Instantiate(CurrentGun.bullet, CurrentGun.BulletSpawnPoint.position, rotation);
+		//Vector3 spread = new Vector3(xSpread, ySpread, 0.0f).normalized * CurrentGun.ConeSpreadSize;
+		//Quaternion rotation = Quaternion.Euler(spread) * CurrentGun.BulletSpawnPoint.rotation;
+		//Instantiate(CurrentGun.bullet, CurrentGun.BulletSpawnPoint.position, rotation);
 	}
 }
 

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SmoothMouseLook : MonoBehaviour
 {
@@ -37,9 +38,7 @@ public class SmoothMouseLook : MonoBehaviour
 	{
 		if (player)
 		{
-			//transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * followSmooth);
 			transform.position = Vector3.SmoothDamp(transform.position, player.transform.position, ref currentVel, Time.deltaTime * followSmooth);
-			//(transform.position, player.transform.position, Time.deltaTime * followSmooth);
 		}
 		else
 		{

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ead8b65fb9d90d42a9af697f4409728, type: 3}
+  m_Name: M2
+  m_EditorClassIdentifier: 
+  firingModes: 4
+  magazineInfo:
+    MagazineCapacity: 100
+    TotalAmmoCount: 3
+  recoilInfo:
+    VerticalRecoil: 5
+    HorizontalRecoil: 2
+    MinConeSpreadSize: 0
+    MaxConeSpreadSize: 0
+    SpreadIncrementAmountPerBulletShoot: 0.5
+    SpreadBackupSpeed: 1
+  bulletPrefab: {fileID: 203254278523172890, guid: d3ae3301ab6bb154f832e8313b9fbe08,
+    type: 3}
+  bulletSpecifics: {fileID: 11400000, guid: 7b892f8964911e348bb94e73341e1c7f, type: 2}
+  ReloadTime: 5.5
+  FireRate: 10

@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0fb8e1ca18552d4994d6c208bc2f72a, type: 3}
+  m_Name: 9mm
+  m_EditorClassIdentifier: 
+  BulletForce: 7
+  bulletImpacts:
+  - {fileID: -3883545047865198889, guid: a93be80ff1d310843a8e4c7e10e76398, type: 3}
+  - {fileID: 3334204124902283026, guid: f5ee8255a97de7b449ab46f9f593bbcd, type: 3}

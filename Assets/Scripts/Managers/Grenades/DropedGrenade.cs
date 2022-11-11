@@ -1,7 +1,10 @@
 using UnityEngine;
 
-public class DropedGrenade : MonoBehaviour
+namespace BallShooter.Player
 {
-	public Throwable grenade;
-	[HideInInspector] public bool hasBeenPicked = false;
+	public class DropedGrenade : MonoBehaviour
+	{
+		public Throwable grenade;
+		[HideInInspector] public bool hasBeenPicked = false;
+	}
 }

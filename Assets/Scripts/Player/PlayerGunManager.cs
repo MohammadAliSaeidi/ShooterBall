@@ -1,3 +1,4 @@
+using BallShooter.Player;
 using UnityEngine;
 
 public class PlayerGunManager : MonoBehaviour
@@ -5,17 +6,27 @@ public class PlayerGunManager : MonoBehaviour
 	private PlayerManager playerManager;
 	private bool _firing = false;
 	private float LastFireTime = -1;
+	private Gun_New gun;
 
 	public void Initiate(PlayerManager playerManager)
 	{
 		this.playerManager = playerManager;
 
-		playerManager.inputManager.playerControls.Ground.Fire.performed += (UnityEngine.InputSystem.InputAction.CallbackContext context) =>
+		playerManager.InputManager.playerControls.Ground.Fire.performed += (UnityEngine.InputSystem.InputAction.CallbackContext context) =>
 		{
 			_firing = true;
 		};
 
-		playerManager.inputManager.playerControls.Ground.Fire.canceled += (UnityEngine.InputSystem.InputAction.CallbackContext context) =>
+		playerManager.EquipmentManager.e_OnEquipmentSwitched.AddListener(delegate
+		{
+			var selectedEquipment = playerManager.EquipmentManager.SelectedEquipment;
+			if (selectedEquipment != null && selectedEquipment is Gun_New)
+			{
+				gun = (Gun_New)selectedEquipment;
+			}
+		});
+
+		playerManager.InputManager.playerControls.Ground.Fire.canceled += (UnityEngine.InputSystem.InputAction.CallbackContext context) =>
 		{
 			_firing = false;
 		};
@@ -23,7 +34,7 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void Update()
 	{
-		if (_firing)
+		if (_firing && gun)
 		{
 			HandleFire();
 		}
@@ -31,25 +42,13 @@ public class PlayerGunManager : MonoBehaviour
 
 	private void HandleFire()
 	{
-		if (Time.time > LastFireTime + 1 / playerManager.equipmentManager.CurrentGun.FireRate)
+		if (Time.time > LastFireTime + 1 / gun.specifics.FireRate)
 		{
-			ShootBullet();
-			//playerManager.equipmentManager.CurrentGun CurrentGun.EmitMuzzleFlash();
-			//playerManager.recoilHandler.GenerateRecoil(CurrentGun.HorizontalRecoil, CurrentGun.VerticalRecoil);
-			//playerManager.crosshairManager.HandleCrossHair(CurrentGun.VerticalRecoil);
-			//CurrentGun.BulletShellParticle.Emit(1);
-			//CameraAnimator_01.SetTrigger("Shoot");
-			//IncreaseSpread(CurrentGun);
-			//LastFireTime = Time.time;
-		}
-	}
+			gun.Fire();
 
-	private void ShootBullet()
-	{
-		float xSpread = Random.Range(-1, 1);
-		float ySpread = Random.Range(-1, 1);
-		//Vector3 spread = new Vector3(xSpread, ySpread, 0.0f).normalized * CurrentGun.ConeSpreadSize;
-		//Quaternion rotation = Quaternion.Euler(spread) * CurrentGun.BulletSpawnPoint.rotation;
-		//Instantiate(CurrentGun.bullet, CurrentGun.BulletSpawnPoint.position, rotation);
+			playerManager.RecoilHandler.GenerateRecoil(gun.specifics.recoilInfo.HorizontalRecoil, gun.specifics.recoilInfo.VerticalRecoil);
+			playerManager.CrosshairManager.HandleCrossHair(gun.specifics.recoilInfo.VerticalRecoil);
+			LastFireTime = Time.time;
+		}
 	}
 }

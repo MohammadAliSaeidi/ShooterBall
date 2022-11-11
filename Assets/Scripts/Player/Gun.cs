@@ -1,44 +1,35 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
 
 public class Gun : MonoBehaviour, IEquipment
 {
 	public DropedGun dropedGun;
 
-	[Header("Ammo")]
-	public int Ammo = 30;
-	public int MagazineAmmo = 30;
+	public GunSpecifics specifics;
+
+	public int CurrentMagazineAmmoCount;
+	public int ExtraAmmoCount;
 
 	[Header("Firing Options")]
-	public Bullet bullet;
 	public ParticleSystem BulletShellParticle;
-	public float FireRate;
 	public Transform BulletSpawnPoint;
 
 	[Header("MuzzleFlash")]
 	public GameObject MuzzleFlashContainer;
 	public GameObject CoolDownContainer;
-	ParticleSystem[] muzzleFlashParticles;
-	ParticleSystem[] coolDownParticles;
+	private ParticleSystem[] muzzleFlashParticles;
+	private ParticleSystem[] coolDownParticles;
 
 	[Header("Heat")]
 	public float MaxHeatParticles = 10;
-	float heatAmount = 0;
-
-	[Header("Recoil Attributes")]
-	public float VerticalRecoil;
-	public float HorizontalRecoil;
-	public float ConeSpreadSize;
+	private float heatAmount = 0;
 
 	[Header("CrossHair")]
 	public CrossHairMaster crossHair;
 
 	[Space(5)]
 	public Transform PlayerGunHolder;
-
-	bool gunIsOnRightPos = false;
+	private bool gunIsOnRightPos = false;
 
 	public void Start()
 	{
@@ -50,22 +41,21 @@ public class Gun : MonoBehaviour, IEquipment
 
 	private void OnEnable()
 	{
-		
+
 	}
 
 	private void Update()
 	{
-		if(PlayerGunHolder && !gunIsOnRightPos)
+		if (PlayerGunHolder && !gunIsOnRightPos)
 		{
 			float dist = Vector3.Distance(transform.position, PlayerGunHolder.transform.position);
 			float angle = Quaternion.Angle(transform.rotation, PlayerGunHolder.transform.rotation);
-			if(dist > 0.1f || angle > 0.1f)
+			if (dist > 0.1f || angle > 0.1f)
 			{
 				float speed = 10f;
 
 				transform.position = Vector3.Lerp(transform.position, PlayerGunHolder.transform.position, Time.deltaTime * speed / dist);
-				transform.rotation = Quaternion.Lerp(transform.rotation, PlayerGunHolder.transform.rotation, Time.deltaTime * speed);
-			}
+				transform.rotation = Quaternion.Lerp(transform.rotation, PlayerGunHolder.transform.rotation, Time.deltaTime * speed);			}
 			else
 			{
 				transform.position = PlayerGunHolder.position;
@@ -77,12 +67,12 @@ public class Gun : MonoBehaviour, IEquipment
 			}
 		}
 
-		if(heatAmount > 0)
+		if (heatAmount > 0)
 		{
 			heatAmount -= MaxHeatParticles / 5 * Time.deltaTime;
 			HandleCoolDown();
 		}
-		else if(heatAmount < 0)
+		else if (heatAmount < 0)
 		{
 			heatAmount = 0;
 		}
@@ -94,19 +84,19 @@ public class Gun : MonoBehaviour, IEquipment
 
 	public void EmitMuzzleFlash()
 	{
-		foreach(var m in muzzleFlashParticles)
+		foreach (var m in muzzleFlashParticles)
 		{
 			ParticleSystem.EmissionModule emit = m.emission;
 			emit.enabled = true;
 			float probability = emit.GetBurst(0).probability;
 			float rand = (UnityEngine.Random.Range(0, 10)) / 10;
-			if(rand <= probability)
+			if (rand <= probability)
 			{
 				m.Emit(UnityEngine.Random.Range(emit.GetBurst(0).minCount, emit.GetBurst(0).maxCount));
 			}
 		}
 
-		if(heatAmount < MaxHeatParticles)
+		if (heatAmount < MaxHeatParticles)
 		{
 			heatAmount += MaxHeatParticles / 10;
 		}
@@ -114,7 +104,7 @@ public class Gun : MonoBehaviour, IEquipment
 
 	public void StopMuzzleFlash()
 	{
-		foreach(var m in muzzleFlashParticles)
+		foreach (var m in muzzleFlashParticles)
 		{
 			ParticleSystem.EmissionModule emit = m.emission;
 			m.Clear();
@@ -124,7 +114,7 @@ public class Gun : MonoBehaviour, IEquipment
 
 	public void HandleCoolDown()
 	{
-		foreach(var m in coolDownParticles)
+		foreach (var m in coolDownParticles)
 		{
 			ParticleSystem.EmissionModule emit = m.emission;
 			ParticleSystem.MinMaxCurve rate = emit.rateOverTime;
@@ -135,17 +125,22 @@ public class Gun : MonoBehaviour, IEquipment
 
 	private void StopCoolDownEffect()
 	{
-		foreach(var i in muzzleFlashParticles)
+		foreach (var i in muzzleFlashParticles)
 		{
 			ParticleSystem.EmissionModule emit = i.emission;
 			emit.enabled = false;
 		}
-		foreach(var i in coolDownParticles)
+		foreach (var i in coolDownParticles)
 		{
 			ParticleSystem.EmissionModule emit = i.emission;
 			ParticleSystem.MinMaxCurve rate = emit.rateOverTime;
 			rate.constant = 0;
 			emit.enabled = false;
 		}
+	}
+
+	public void Equip()
+	{
+		
 	}
 }

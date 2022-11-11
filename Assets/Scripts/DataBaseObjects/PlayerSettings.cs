@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using SQLite4Unity3d;
 
-public class PlayerConfig {
+public class PlayerSettings {
 	[PrimaryKey]
 	public string PlayerName { get; set; }
 	// setting config

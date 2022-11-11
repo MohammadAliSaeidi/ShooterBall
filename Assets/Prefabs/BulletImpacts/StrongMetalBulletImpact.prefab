@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 895009444339775452}
   - component: {fileID: 895009444339775455}
+  - component: {fileID: 3334204124902283026}
   m_Layer: 0
   m_Name: StrongMetalBulletImpact
   m_TagString: Untagged
@@ -52,6 +53,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Age: 1
   Target: {fileID: 0}
+--- !u!114 &3334204124902283026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 895009444339775454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a3660bacd492bb48bf6f5703bea4b22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletImpactTag: 1
 --- !u!1 &895009446029001705
 GameObject:
   m_ObjectHideFlags: 0
