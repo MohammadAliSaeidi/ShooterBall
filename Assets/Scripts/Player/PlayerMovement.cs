@@ -59,7 +59,7 @@ namespace BallShooter
 		private void FixedUpdate()
 		{
 			if (playerRB)
-			{ //&& Shared.playerHandler.allowMove) {
+			{
 				MovePlayer();
 			}
 		}

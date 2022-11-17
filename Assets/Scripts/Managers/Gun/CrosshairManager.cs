@@ -1,31 +1,39 @@
 using UnityEngine;
 
-public class CrosshairManager : MonoBehaviour
+namespace BallShooter.Player
 {
-	[Header("CrossHair")]
-	public CrossHairMaster crossHair;
-
-	public void InitCrosshair(Gun gun)
+	public class CrosshairManager : MonoBehaviour
 	{
-		if (gun)
+		[Header("CrossHair")]
+		public CrossHairMaster crossHair;
+
+		private void Start()
 		{
-			crossHair.gameObject.SetActive(true);
-			foreach (var s in crossHair.sliders)
+
+		}
+
+		public void InitCrosshair(Gun gun)
+		{
+			if (gun)
 			{
-				s.maxValue = gun.specifics.recoilInfo.VerticalRecoil * 10;
+				crossHair.gameObject.SetActive(true);
+				foreach (var s in crossHair.sliders)
+				{
+					s.maxValue = gun.Specifics.recoilInfo.VerticalRecoil * 10;
+				}
+			}
+			else
+			{
+				crossHair.gameObject.SetActive(false);
 			}
 		}
-		else
-		{
-			crossHair.gameObject.SetActive(false);
-		}
-	}
 
-	public void HandleCrossHair(float additiveValue)
-	{
-		foreach (var s in crossHair.sliders)
+		public void HandleCrossHair(float additiveValue)
 		{
-			s.value += additiveValue;
+			foreach (var s in crossHair.sliders)
+			{
+				s.value += additiveValue;
+			}
 		}
 	}
 }

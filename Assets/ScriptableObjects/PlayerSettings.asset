@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d671c7b129e5edc4b8262160ab30feeb, type: 3}
   m_Name: PlayerSettings
   m_EditorClassIdentifier: 
+  IsMultiplayer: 1
   MaxGunSlots: 2
   MaxThrowableSlots: 4
   playerMovementConfig:

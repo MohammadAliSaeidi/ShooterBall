@@ -1,16 +1,27 @@
+using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
 
+[Serializable]
 [RequireComponent(typeof(Rigidbody))]
 public class Bullet : MonoBehaviour
 {
+	// TODO: this must not be SerializeField
+	[SerializeField]
 	private BulletSpeicifcs _bulletSpecifics;
 
 	public float Age = 5;
 	public TrailRenderer trail;
+	public bool IsVisual;
 	private Vector3 prevPos;
 	private Rigidbody rb;
+
+	private void Start()
+	{
+		// TODO: this method must be called via Gun.cs
+		InitiateAndShoot(_bulletSpecifics);
+	}
 
 	public void InitiateAndShoot(BulletSpeicifcs bulletSpecifics)
 	{

@@ -1,5 +1,5 @@
 using UnityEngine.Events;
 
-public class UnityEvent_Equipment : UnityEvent<IEquipment>
+public class UnityEvent_Equipment : UnityEvent<Equipment>
 {
 }

@@ -19,12 +19,13 @@ MonoBehaviour:
   recoilInfo:
     VerticalRecoil: 5
     HorizontalRecoil: 2
-    MinConeSpreadSize: 0
-    MaxConeSpreadSize: 0
+    MinConeSpreadSize: 0.1
+    MaxConeSpreadSize: 1
     SpreadIncrementAmountPerBulletShoot: 0.5
     SpreadBackupSpeed: 1
   bulletPrefab: {fileID: 203254278523172890, guid: d3ae3301ab6bb154f832e8313b9fbe08,
     type: 3}
+  mp_bulletPrefab: {fileID: 0}
   bulletSpecifics: {fileID: 11400000, guid: 7b892f8964911e348bb94e73341e1c7f, type: 2}
   ReloadTime: 5.5
   FireRate: 10

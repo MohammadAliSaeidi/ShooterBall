@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class SmoothMouseLook : MonoBehaviour
 {
 	[SerializeField] private PlayerInputManager playerInputManager;
 
-	private GameObject player;
+	[SerializeField] private GameObject player;
 	private bool allowMouseLook = true;
 
 	public float mouseSpeed = 1.2f;
@@ -25,7 +24,7 @@ public class SmoothMouseLook : MonoBehaviour
 		Vertical = -transform.eulerAngles.x;
 		Horizontal = transform.eulerAngles.y;
 
-		Cursor.lockState = CursorLockMode.Locked;
+		//Cursor.lockState = CursorLockMode.Locked;
 	}
 
 	private void Update()
@@ -38,11 +37,7 @@ public class SmoothMouseLook : MonoBehaviour
 	{
 		if (player)
 		{
-			transform.position = Vector3.SmoothDamp(transform.position, player.transform.position, ref currentVel, Time.deltaTime * followSmooth);
-		}
-		else
-		{
-			player = GameObject.FindWithTag("Player");
+			transform.position = Vector3.Lerp(transform.position, player.transform.position, Time.deltaTime * followSmooth);
 		}
 	}
 
